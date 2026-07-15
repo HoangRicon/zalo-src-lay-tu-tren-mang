@@ -1,0 +1,26 @@
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import vuetify from 'vite-plugin-vuetify';
+import { fileURLToPath } from 'node:url';
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    vuetify({ autoImport: true }),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': 'http://zalo-crm-app-dev:3080',
+      '/socket.io': {
+        target: 'http://zalo-crm-app-dev:3080',
+        ws: true,
+      },
+    },
+  },
+});
