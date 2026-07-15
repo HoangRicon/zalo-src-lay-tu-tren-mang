@@ -12,12 +12,15 @@
 import { computed } from 'vue';
 import { Doughnut } from 'vue-chartjs';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useResponsive } from '@/composables/use-responsive';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const props = defineProps<{
   data: { status: string | null; _count: { _all: number } | number }[];
 }>();
+
+const { isPhone } = useResponsive();
 
 const statusColors: Record<string, string> = {
   new: '#9E9E9E',
@@ -52,9 +55,14 @@ const chartData = computed(() => {
   };
 });
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { position: 'right' as const, labels: { boxWidth: 12 } } },
-};
+  plugins: {
+    legend: {
+      position: isPhone.value ? ('bottom' as const) : ('right' as const),
+      labels: { boxWidth: 12 },
+    },
+  },
+}));
 </script>

@@ -20,12 +20,15 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { useResponsive } from '@/composables/use-responsive';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const props = defineProps<{
   data: { date: string; sent: number; received: number }[];
 }>();
+
+const { isPhone } = useResponsive();
 
 const chartData = computed(() => {
   if (!props.data?.length) return null;
@@ -38,9 +41,14 @@ const chartData = computed(() => {
   };
 });
 
-const chartOptions = {
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { position: 'top' as const } },
-};
+  plugins: {
+    legend: {
+      position: isPhone.value ? ('bottom' as const) : ('top' as const),
+      labels: { boxWidth: 12 },
+    },
+  },
+}));
 </script>

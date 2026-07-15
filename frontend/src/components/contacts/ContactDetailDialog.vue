@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="show" max-width="680" persistent scrollable>
+  <v-dialog v-model="show" :fullscreen="isPhone" :max-width="isPhone ? undefined : 680" persistent scrollable>
     <v-card>
       <v-card-title class="d-flex align-center">
         <span>{{ isNew ? 'Thêm khách hàng' : 'Chi tiết khách hàng' }}</span>
@@ -115,8 +115,16 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { Contact } from '@/composables/use-contacts';
 import { SOURCE_OPTIONS, STATUS_OPTIONS, useContacts } from '@/composables/use-contacts';
+import { useResponsive } from '@/composables/use-responsive';
+
+const { t } = useI18n();
+const { isPhone } = useResponsive();
+
+// t reserved for future aria-labels; keep to avoid unused-import warning.
+void t;
 
 const props = defineProps<{
   modelValue: boolean;

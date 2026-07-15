@@ -317,3 +317,60 @@ html, body {
 .v-theme--light .text-grey-lighten-2 {
   color: #bbb !important;
 }
+
+/* ============================================================
+ * Mobile-first responsive utilities (change: mobile-fe-optimization)
+ * ============================================================ */
+
+/* Touch target: minimum 44×44px hit area on touch breakpoints */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Safe-area helpers — add to fixed bars so they clear notches/home indicator */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Prevent body scroll when a mobile sheet is open */
+.no-scroll {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Card list variant used by ResponsiveDataTable on xs/sm */
+.responsive-card-list .responsive-card {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-glow, rgba(0, 242, 255, 0.1));
+}
+.v-theme--light .responsive-card-list .responsive-card {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Reduced motion: drop long transitions/animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile-first nav shell */
+@media (max-width: 599px) {
+  .desktop-only { display: none !important; }
+  .v-main { padding-bottom: 64px; } /* clear BottomNav */
+}
+@media (min-width: 600px) {
+  .mobile-only { display: none !important; }
+}

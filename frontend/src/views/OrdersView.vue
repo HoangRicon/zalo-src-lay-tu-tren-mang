@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">
+    <div class="d-flex align-center mb-4 flex-wrap">
+      <h1 class="text-h5 text-md-h4">
         <v-icon class="mr-2" style="color: #00F2FF;">mdi-cart-outline</v-icon>
         Đơn hàng
       </h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="openCreate">Tạo đơn</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" class="touch-target" @click="openCreate">Tạo đơn</v-btn>
     </div>
 
     <!-- Stats cards -->
@@ -65,67 +65,97 @@
     <!-- Orders table -->
     <v-card variant="outlined" class="mb-6">
       <v-progress-linear v-if="loading" indeterminate color="primary" />
-      <v-table density="compact">
-        <thead>
-          <tr>
-            <th>Mã đơn</th>
-            <th>Khách hàng</th>
-            <th>Tổng tiền</th>
-            <th>Trạng thái</th>
-            <th>Nhân viên</th>
-            <th>Ngày tạo</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!loading && orders.length === 0">
-            <td colspan="7" class="text-center text-grey py-6">Không có đơn hàng</td>
-          </tr>
-          <tr v-for="o in orders" :key="o.id">
-            <td class="text-caption font-weight-medium">{{ o.orderCode }}</td>
-            <td>{{ o.contact?.fullName || '—' }}</td>
-            <td>{{ formatVND(o.totalAmount) }}</td>
-            <td>
+      <div class="responsive-card-list">
+        <v-table density="compact" class="desktop-only">
+          <thead>
+            <tr>
+              <th>Mã đơn</th>
+              <th>Khách hàng</th>
+              <th>Tổng tiền</th>
+              <th>Trạng thái</th>
+              <th>Nhân viên</th>
+              <th>Ngày tạo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!loading && orders.length === 0">
+              <td colspan="7" class="text-center text-grey py-6">Không có đơn hàng</td>
+            </tr>
+            <tr v-for="o in orders" :key="o.id">
+              <td class="text-caption font-weight-medium">{{ o.orderCode }}</td>
+              <td>{{ o.contact?.fullName || '—' }}</td>
+              <td>{{ formatVND(o.totalAmount) }}</td>
+              <td>
+                <v-chip size="x-small" :color="statusColor(o.status)" variant="tonal">
+                  {{ statusLabel(o.status) }}
+                </v-chip>
+              </td>
+              <td>{{ o.createdBy?.fullName || '—' }}</td>
+              <td class="text-caption">{{ formatDate(o.createdAt) }}</td>
+              <td>
+                <v-btn icon size="x-small" variant="text" class="touch-target" @click="openEdit(o)">
+                  <v-icon size="16">mdi-pencil</v-icon>
+                </v-btn>
+                <v-btn icon size="x-small" variant="text" color="error" class="touch-target" @click="confirmDelete(o.id)">
+                  <v-icon size="16">mdi-delete</v-icon>
+                </v-btn>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+        <!-- Stacked card list (xs/sm) -->
+        <div v-if="!loading && orders.length > 0" class="mobile-only">
+          <div
+            v-for="o in orders"
+            :key="o.id"
+            class="responsive-card touch-target"
+            role="button"
+            tabindex="0"
+            :aria-label="`${o.orderCode} — ${o.contact?.fullName || ''}`"
+            @click="openEdit(o)"
+            @keydown.enter="openEdit(o)"
+          >
+            <div class="d-flex justify-space-between align-start">
+              <div class="flex-grow-1" style="min-width: 0;">
+                <div class="font-weight-medium">{{ o.orderCode }}</div>
+                <div class="text-caption text-medium-emphasis text-truncate">{{ o.contact?.fullName || '—' }}</div>
+                <div class="text-body-2 mt-1 font-weight-bold">{{ formatVND(o.totalAmount) }}</div>
+              </div>
               <v-chip size="x-small" :color="statusColor(o.status)" variant="tonal">
                 {{ statusLabel(o.status) }}
               </v-chip>
-            </td>
-            <td>{{ o.createdBy?.fullName || '—' }}</td>
-            <td class="text-caption">{{ formatDate(o.createdAt) }}</td>
-            <td>
-              <v-btn icon size="x-small" variant="text" @click="openEdit(o)">
-                <v-icon size="16">mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn icon size="x-small" variant="text" color="error" @click="confirmDelete(o.id)">
-                <v-icon size="16">mdi-delete</v-icon>
-              </v-btn>
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
+            </div>
+            <div class="d-flex justify-space-between align-center mt-2 text-caption text-medium-emphasis">
+              <span>{{ o.createdBy?.fullName || '—' }}</span>
+              <span>{{ formatDate(o.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </v-card>
 
     <!-- Staff performance -->
     <OrderStaffTable :staff-stats="staffStats" />
 
     <!-- Create / Edit dialog -->
-    <v-dialog v-model="dialog" max-width="480">
+    <v-dialog v-model="dialog" max-width="480" class="responsive-dialog">
       <v-card>
-        <v-card-title>{{ editingId ? 'Cập nhật đơn hàng' : 'Tạo đơn hàng' }}</v-card-title>
+        <v-card-title class="text-h6">{{ editingId ? 'Cập nhật đơn hàng' : 'Tạo đơn hàng' }}</v-card-title>
         <v-card-text>
           <v-text-field v-if="!editingId" v-model="form.contactId" label="ID Khách hàng" density="compact"
-            variant="outlined" class="mb-3" hide-details />
+            variant="outlined" class="mb-3 touch-target" hide-details />
           <v-text-field v-model.number="form.totalAmount" label="Tổng tiền (VND)" type="number"
-            density="compact" variant="outlined" class="mb-3" hide-details />
+            density="compact" variant="outlined" class="mb-3 touch-target" hide-details />
           <v-select v-model="form.status" label="Trạng thái" :items="ORDER_STATUS_OPTIONS"
-            item-title="text" item-value="value" density="compact" variant="outlined" class="mb-3" hide-details />
+            item-title="text" item-value="value" density="compact" variant="outlined" class="mb-3 touch-target" hide-details />
           <v-textarea v-model="form.notes" label="Ghi chú" rows="2" density="compact"
             variant="outlined" hide-details />
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="safe-area-bottom">
           <v-spacer />
-          <v-btn variant="text" @click="dialog = false">Huỷ</v-btn>
-          <v-btn color="primary" :loading="saving" @click="submit">Lưu</v-btn>
+          <v-btn variant="text" class="touch-target" @click="dialog = false">Huỷ</v-btn>
+          <v-btn color="primary" :loading="saving" class="touch-target" @click="submit">Lưu</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

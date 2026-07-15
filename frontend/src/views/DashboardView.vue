@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">
+    <h1 class="text-h5 text-md-h4 mb-4">
       <v-icon class="mr-2" style="color: #00F2FF;">mdi-view-dashboard</v-icon>
       Dashboard
     </h1>
@@ -13,8 +13,8 @@
       <v-col cols="6" sm="3">
         <v-card variant="outlined">
           <v-card-text class="text-center pa-3">
-            <v-icon icon="mdi-cart-outline" color="primary" size="28" class="mb-1" />
-            <div class="text-h5 font-weight-bold">{{ orderStats?.totalOrders ?? '—' }}</div>
+            <v-icon icon="mdi-cart-outline" color="primary" size="24" class="mb-1" />
+            <div class="text-h6 text-md-h5 font-weight-bold">{{ orderStats?.totalOrders ?? '—' }}</div>
             <div class="text-caption text-grey">Đơn hàng mới</div>
           </v-card-text>
         </v-card>
@@ -22,8 +22,8 @@
       <v-col cols="6" sm="3">
         <v-card variant="outlined">
           <v-card-text class="text-center pa-3">
-            <v-icon icon="mdi-calendar-today" color="orange" size="28" class="mb-1" />
-            <div class="text-h6 font-weight-bold">{{ formatVND(orderStats?.todayRevenue ?? 0) }}</div>
+            <v-icon icon="mdi-calendar-today" color="orange" size="24" class="mb-1" />
+            <div class="text-subtitle-1 text-md-h6 font-weight-bold">{{ formatVND(orderStats?.todayRevenue ?? 0) }}</div>
             <div class="text-caption text-grey">Doanh thu hôm nay</div>
           </v-card-text>
         </v-card>

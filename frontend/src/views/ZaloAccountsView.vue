@@ -1,49 +1,94 @@
 <template>
   <div>
-    <div class="d-flex align-center mb-4">
-      <h1 class="text-h4">Tài khoản Zalo</h1>
+    <div class="d-flex align-center mb-4 flex-wrap">
+      <h1 class="text-h5 text-md-h4">Tài khoản Zalo</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="showAddDialog = true">Thêm Zalo</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" class="touch-target" @click="showAddDialog = true">Thêm Zalo</v-btn>
     </div>
 
     <v-card>
-      <v-data-table :headers="headers" :items="accounts" :loading="loading" no-data-text="Chưa có tài khoản Zalo nào">
+      <v-data-table
+        class="desktop-only"
+        :headers="headers"
+        :items="accounts"
+        :loading="loading"
+        no-data-text="Chưa có tài khoản Zalo nào"
+      >
         <template #item.status="{ item }">
           <v-chip :color="statusColor(item.liveStatus || item.status)" size="small" variant="flat">
             {{ statusText(item.liveStatus || item.status) }}
           </v-chip>
         </template>
         <template #item.actions="{ item }">
-          <v-btn v-if="authStore.isAdmin" icon size="small" color="cyan" title="Phân quyền truy cập" @click="openAccess(item)">
+          <v-btn v-if="authStore.isAdmin" icon size="small" color="cyan" class="touch-target" title="Phân quyền truy cập" @click="openAccess(item)">
             <v-icon>mdi-shield-account</v-icon>
           </v-btn>
-          <v-btn icon size="small" color="success" @click="syncContacts(item.id)" title="Đồng bộ danh bạ Zalo" :loading="syncing === item.id">
+          <v-btn icon size="small" color="success" class="touch-target" @click="syncContacts(item.id)" title="Đồng bộ danh bạ Zalo" :loading="syncing === item.id">
             <v-icon>mdi-account-sync</v-icon>
           </v-btn>
-          <v-btn v-if="item.liveStatus !== 'connected'" icon size="small" color="primary" @click="loginAccount(item.id)" title="Đăng nhập QR">
+          <v-btn v-if="item.liveStatus !== 'connected'" icon size="small" color="primary" class="touch-target" @click="loginAccount(item.id)" title="Đăng nhập QR">
             <v-icon>mdi-qrcode</v-icon>
           </v-btn>
-          <v-btn v-if="item.liveStatus === 'disconnected' && item.sessionData" icon size="small" color="info" @click="reconnectAccount(item.id)" title="Kết nối lại">
+          <v-btn v-if="item.liveStatus === 'disconnected' && item.sessionData" icon size="small" color="info" class="touch-target" @click="reconnectAccount(item.id)" title="Kết nối lại">
             <v-icon>mdi-refresh</v-icon>
           </v-btn>
-          <v-btn icon size="small" color="error" @click="confirmDelete(item)" title="Xóa">
+          <v-btn icon size="small" color="error" class="touch-target" @click="confirmDelete(item)" title="Xóa">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
       </v-data-table>
+
+      <!-- Stacked card list — mobile -->
+      <div v-if="!loading && accounts.length === 0" class="mobile-only pa-6 text-center text-medium-emphasis">
+        Chưa có tài khoản Zalo nào
+      </div>
+      <div v-else class="mobile-only responsive-card-list">
+        <div
+          v-for="a in accounts"
+          :key="a.id"
+          class="responsive-card"
+        >
+          <div class="d-flex justify-space-between align-center">
+            <div class="flex-grow-1" style="min-width: 0;">
+              <div class="font-weight-medium text-truncate">{{ a.displayName || a.id }}</div>
+              <div class="text-caption text-medium-emphasis">{{ a.zaloUid || a.phone || '—' }}</div>
+            </div>
+            <v-chip :color="statusColor(a.liveStatus || a.status)" size="x-small" variant="flat">
+              {{ statusText(a.liveStatus || a.status) }}
+            </v-chip>
+          </div>
+          <div class="d-flex flex-wrap mt-2" style="gap: 4px;">
+            <v-btn v-if="authStore.isAdmin" icon size="x-small" variant="text" color="cyan" class="touch-target" :aria-label="'Phân quyền'" @click="openAccess(a)">
+              <v-icon size="18">mdi-shield-account</v-icon>
+            </v-btn>
+            <v-btn icon size="x-small" variant="text" color="success" class="touch-target" :aria-label="'Đồng bộ'" @click="syncContacts(a.id)" :loading="syncing === a.id">
+              <v-icon size="18">mdi-account-sync</v-icon>
+            </v-btn>
+            <v-btn v-if="a.liveStatus !== 'connected'" icon size="x-small" variant="text" color="primary" class="touch-target" :aria-label="'Đăng nhập QR'" @click="loginAccount(a.id)">
+              <v-icon size="18">mdi-qrcode</v-icon>
+            </v-btn>
+            <v-btn v-if="a.liveStatus === 'disconnected' && a.sessionData" icon size="x-small" variant="text" color="info" class="touch-target" :aria-label="'Kết nối lại'" @click="reconnectAccount(a.id)">
+              <v-icon size="18">mdi-refresh</v-icon>
+            </v-btn>
+            <v-btn icon size="x-small" variant="text" color="error" class="touch-target" :aria-label="'Xóa'" @click="confirmDelete(a)">
+              <v-icon size="18">mdi-delete</v-icon>
+            </v-btn>
+          </div>
+        </div>
+      </div>
     </v-card>
 
     <!-- Add account dialog -->
-    <v-dialog v-model="showAddDialog" max-width="400">
+    <v-dialog v-model="showAddDialog" max-width="400" class="responsive-dialog">
       <v-card>
         <v-card-title>Thêm tài khoản Zalo</v-card-title>
         <v-card-text>
-          <v-text-field v-model="newAccountName" label="Tên hiển thị (VD: Zalo Sale Hương)" />
+          <v-text-field v-model="newAccountName" label="Tên hiển thị (VD: Zalo Sale Hương)" class="touch-target" />
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="safe-area-bottom">
           <v-spacer />
-          <v-btn @click="showAddDialog = false">Hủy</v-btn>
-          <v-btn color="primary" :loading="adding" @click="handleAddAccount">Thêm</v-btn>
+          <v-btn class="touch-target" @click="showAddDialog = false">Hủy</v-btn>
+          <v-btn color="primary" :loading="adding" class="touch-target" @click="handleAddAccount">Thêm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -75,14 +120,14 @@
     </v-dialog>
 
     <!-- Delete confirm dialog -->
-    <v-dialog v-model="showDeleteDialog" max-width="400">
+    <v-dialog v-model="showDeleteDialog" max-width="400" class="responsive-dialog">
       <v-card>
         <v-card-title>Xác nhận xóa</v-card-title>
         <v-card-text>Bạn có chắc muốn xóa tài khoản "{{ deleteTarget?.displayName || deleteTarget?.id }}"?</v-card-text>
-        <v-card-actions>
+        <v-card-actions class="safe-area-bottom">
           <v-spacer />
-          <v-btn @click="showDeleteDialog = false">Hủy</v-btn>
-          <v-btn color="error" :loading="deleting" @click="handleDeleteAccount">Xóa</v-btn>
+          <v-btn class="touch-target" @click="showDeleteDialog = false">Hủy</v-btn>
+          <v-btn color="error" :loading="deleting" class="touch-target" @click="handleDeleteAccount">Xóa</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

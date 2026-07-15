@@ -10,8 +10,9 @@
     <!-- Filters -->
     <ContactFilters :filters="filters" @search="onFilterChange" />
 
-    <!-- Data table -->
+    <!-- Data table — desktop -->
     <v-data-table
+      class="desktop-only"
       :headers="headers"
       :items="contacts"
       :loading="loading"
@@ -75,6 +76,37 @@
         <span class="text-body-2">{{ item.assignedUser?.fullName ?? '—' }}</span>
       </template>
     </v-data-table>
+
+    <!-- Stacked card list — mobile -->
+    <div v-if="!loading && contacts.length === 0" class="mobile-only pa-6 text-center text-medium-emphasis">
+      Chưa có khách hàng
+    </div>
+    <div v-else class="mobile-only responsive-card-list">
+      <div
+        v-for="c in contacts"
+        :key="c.id"
+        class="responsive-card touch-target"
+        role="button"
+        tabindex="0"
+        :aria-label="c.fullName ?? ''"
+        @click="openContactDialog(c)"
+        @keydown.enter="openContactDialog(c)"
+      >
+        <div class="d-flex align-center" style="gap: 12px;">
+          <v-avatar size="40" color="grey-lighten-2">
+            <v-img v-if="c.avatarUrl" :src="c.avatarUrl" />
+            <v-icon v-else size="20">mdi-account</v-icon>
+          </v-avatar>
+          <div class="flex-grow-1" style="min-width: 0;">
+            <div class="font-weight-medium text-truncate">{{ c.fullName }}</div>
+            <div class="text-caption text-medium-emphasis text-truncate">{{ c.phone || c.email || '—' }}</div>
+          </div>
+          <v-chip v-if="c.status" :color="statusColor(c.status)" size="x-small" variant="tonal">
+            {{ statusLabel(c.status) }}
+          </v-chip>
+        </div>
+      </div>
+    </div>
 
     <!-- Contact detail/edit dialog -->
     <ContactDetailDialog
@@ -151,6 +183,11 @@ function openCreate() {
 
 function onRowClick(_event: Event, row: { item: Contact }) {
   selectedContact.value = row.item;
+  showDialog.value = true;
+}
+
+function openContactDialog(contact: Contact) {
+  selectedContact.value = contact;
   showDialog.value = true;
 }
 

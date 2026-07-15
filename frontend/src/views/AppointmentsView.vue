@@ -4,7 +4,7 @@
     <div class="d-flex align-center mb-4 flex-wrap gap-2">
       <h1 class="text-h5 mr-4">Lịch hẹn</h1>
       <v-spacer />
-      <v-btn color="primary" prepend-icon="mdi-plus" @click="showCreateDialog = true">
+      <v-btn color="primary" prepend-icon="mdi-plus" class="touch-target" @click="showCreateDialog = true">
         Tạo lịch hẹn
       </v-btn>
     </div>

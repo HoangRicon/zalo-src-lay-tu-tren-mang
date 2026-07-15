@@ -11,18 +11,30 @@
     <template v-else>
       <!-- Header -->
       <div class="pa-3 d-flex align-center" style="border-bottom: 1px solid var(--border-glow, rgba(0,242,255,0.1));">
+        <v-btn
+          v-if="isPhone"
+          icon="mdi-arrow-left"
+          size="small"
+          variant="text"
+          class="touch-target mr-2"
+          :aria-label="t('chat.back_to_list')"
+          @click="$emit('back')"
+        />
         <v-avatar size="36" color="grey-lighten-2" class="mr-3">
           <v-icon v-if="conversation.threadType === 'group'" icon="mdi-account-group" />
           <v-img v-else-if="conversation.contact?.avatarUrl" :src="conversation.contact.avatarUrl" />
           <v-icon v-else icon="mdi-account" />
         </v-avatar>
-        <div class="flex-grow-1">
-          <div class="font-weight-medium">{{ conversation.contact?.fullName || 'Unknown' }}</div>
-          <div class="text-caption text-grey">{{ conversation.zaloAccount?.displayName || 'Zalo' }}</div>
+        <div class="flex-grow-1" style="min-width: 0;">
+          <div class="font-weight-medium text-truncate">{{ conversation.contact?.fullName || 'Unknown' }}</div>
+          <div class="text-caption text-grey text-truncate">{{ conversation.zaloAccount?.displayName || 'Zalo' }}</div>
         </div>
         <v-btn
           :icon="showContactPanel ? 'mdi-account-details' : 'mdi-account-details-outline'"
-          size="small" variant="text"
+          size="small"
+          variant="text"
+          class="touch-target"
+          :aria-label="t('chat.contact_panel_title')"
           :color="showContactPanel ? 'primary' : undefined"
           @click="$emit('toggle-contact-panel')"
         />
@@ -109,8 +121,13 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type { Conversation, Message } from '@/composables/use-chat';
 import { api } from '@/api/index';
+import { useResponsive } from '@/composables/use-responsive';
+
+const { t } = useI18n();
+const { isPhone } = useResponsive();
 
 const props = defineProps<{
   conversation: Conversation | null;
@@ -120,7 +137,7 @@ const props = defineProps<{
   showContactPanel?: boolean;
 }>();
 
-const emit = defineEmits<{ send: [content: string]; 'toggle-contact-panel': [] }>();
+const emit = defineEmits<{ send: [content: string]; 'toggle-contact-panel': []; back: [] }>();
 
 const inputText = ref('');
 const messagesContainer = ref<HTMLElement | null>(null);

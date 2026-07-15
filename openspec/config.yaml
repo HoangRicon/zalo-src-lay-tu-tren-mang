@@ -1,0 +1,22 @@
+schema: spec-driven
+context: |
+  Tech stack: Vue 3 + Vuetify 4 + Vue Router 4 + Pinia 3 + vue-i18n + Chart.js
+  Build: Vite 8 + TypeScript 5.9
+  Existing repo: zalo-src-lay-tu-tren-mang (git)
+  Target: optimize ALL frontend pages for mobile (≤600px), tablet (601–960px), desktop (>960px)
+  Language UI: Vietnamese (default) + English via vue-i18n
+rules:
+  proposal:
+    - Include rollback plan
+    - State exact list of files to be touched
+    - Identify any feature-level (not visual) changes explicitly as out-of-scope
+  specs:
+    - Use Given/When/Then for each scenario
+    - Each acceptance criterion must reference a screen size breakpoint
+    - Include accessibility (touch target ≥44x44, contrast, swipe/gesture) criteria
+  design:
+    - Reference Vuetify 4 breakpoints (xs/sm/md/lg/xl) and the responsive composable
+    - Include diagrams for layout shell (drawer vs bottom-nav swap) and dialog stacking
+  tasks:
+    - Each task must list exact file paths (Create / Modify / Test)
+    - Each task must include Vitest + responsive-snapshot test strategy

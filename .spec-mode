@@ -1,0 +1,4 @@
+mode: openspec
+version: 1.2.0
+selected_at: 2026-07-15T21:27:00+07:00
+reason: existing repo, no .specify/ or openspec/ signals; iterative change

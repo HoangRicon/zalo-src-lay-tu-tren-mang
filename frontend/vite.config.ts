@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vuetify from 'vite-plugin-vuetify';
@@ -16,9 +17,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://zalo-crm-app-dev:3080',
+      '/api': 'http://zalo-crm-app-dev:3000',
       '/socket.io': {
-        target: 'http://zalo-crm-app-dev:3080',
+        target: 'http://zalo-crm-app-dev:3000',
         ws: true,
       },
     },
