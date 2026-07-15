@@ -87,6 +87,26 @@
                   Đồng bộ lịch
                 </v-btn>
               </div>
+              <!-- Location / Google Maps -->
+              <div v-else-if="msg.contentType === 'location'" class="location-card">
+                <div class="d-flex align-center mb-1">
+                  <v-icon size="16" color="success" class="mr-1">mdi-map-marker</v-icon>
+                  <span class="text-caption font-weight-bold" style="color: #81C784;">Vị trí</span>
+                </div>
+                <div v-if="getLocationData(msg)?.address" class="text-body-2 mb-1" style="opacity: 0.9;">{{ getLocationData(msg)!.address }}</div>
+                <div class="text-caption" style="opacity: 0.6; font-size: 0.7rem;">{{ getLocationData(msg)!.lat.toFixed(5) }}, {{ getLocationData(msg)!.lng.toFixed(5) }}</div>
+                <v-btn
+                  size="x-small"
+                  variant="tonal"
+                  color="success"
+                  prepend-icon="mdi-google-maps"
+                  class="mt-2"
+                  :href="getGoogleMapsUrl(getLocationData(msg)!)"
+                  target="_blank"
+                >
+                  Mở Google Maps
+                </v-btn>
+              </div>
               <!-- Default text -->
               <div v-else>{{ parseDisplayContent(msg.content) }}</div>
               <!-- Timestamp -->
@@ -198,6 +218,34 @@ function isReminderMessage(msg: Message): boolean {
   try { const p = JSON.parse(msg.content); return p.action === 'msginfo.actionlist'; } catch { return false; }
 }
 
+interface LocationData { lat: number; lng: number; address: string; }
+function getLocationData(msg: Message): LocationData | null {
+  if (!msg.content) return null;
+  try {
+    const p = JSON.parse(msg.content);
+    // params may be a stringified JSON or already an object
+    let params: Record<string, any> = {};
+    if (typeof p.params === 'string') {
+      params = JSON.parse(p.params);
+    } else if (typeof p.params === 'object' && p.params !== null) {
+      params = p.params;
+    }
+    const lat = params.latitude ?? p.latitude ?? null;
+    const lng = params.longitude ?? p.longitude ?? null;
+    if (lat != null && lng != null) {
+      return {
+        lat: parseFloat(String(lat)),
+        lng: parseFloat(String(lng)),
+        address: p.description || p.title || '',
+      };
+    }
+  } catch {}
+  return null;
+}
+function getGoogleMapsUrl(loc: LocationData): string {
+  return `https://www.google.com/maps?q=${loc.lat},${loc.lng}`;
+}
+
 function getReminderTitle(msg: Message): string {
   try { return JSON.parse(msg.content!).title || ''; } catch { return msg.content || ''; }
 }
@@ -246,4 +294,5 @@ watch(() => props.messages.length, async () => { await nextTick(); if (messagesC
 .file-card { display: flex; align-items: center; padding: 8px 12px; border-radius: 8px; background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.1); }
 .chat-image { max-width: 100%; max-height: 300px; border-radius: 12px; cursor: pointer; transition: transform 0.2s; }
 .chat-image:hover { transform: scale(1.02); }
+.location-card { padding: 8px 12px; border-left: 3px solid #81C784; border-radius: 8px; background: rgba(129, 199, 132, 0.08); }
 </style>

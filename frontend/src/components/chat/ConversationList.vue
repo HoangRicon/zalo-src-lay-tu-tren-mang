@@ -132,6 +132,7 @@ function lastMessagePreview(conv: Conversation): string {
     case 'gif': return prefix + 'GIF';
     case 'file': return prefix + '📎 Tệp đính kèm';
     case 'link': return prefix + '🔗 Liên kết';
+    case 'location': return prefix + '📍 Vị trí';
   }
 
   // Reminder/calendar messages
